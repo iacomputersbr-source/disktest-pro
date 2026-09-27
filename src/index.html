@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiskTest Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#f4f4f4;color:#1a1a1a}
+header{background:#111;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:20px}header h1 span{color:#ff7a00}
+.lang button{background:#333;color:#fff;border:1px solid #555;padding:6px 10px;margin-left:4px;border-radius:6px;cursor:pointer}
+.lang button.active{background:#ff7a00;border-color:#ff7a00}
+main{max-width:1000px;margin:16px auto;padding:0 12px}
+.card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.card h2{font-size:16px;margin-bottom:10px;border-left:4px solid #ff7a00;padding-left:8px}
+button.btn{background:#ff7a00;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:14px;cursor:pointer;margin:4px 4px 4px 0}
+button.btn:disabled{background:#ccc;cursor:not-allowed}
+button.btn.dark{background:#222}
+select,input[type=text]{padding:9px;border:1px solid #ccc;border-radius:8px;font-size:14px;width:100%;margin:6px 0}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th,td{padding:8px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
+th{background:#111;color:#fff}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-weight:bold;font-size:13px}
+.ok{background:#d4edda;color:#155724}.warn{background:#fff3cd;color:#856404}.bad{background:#f8d7da;color:#721c24}
+.progress{height:22px;background:#e9e9e9;border-radius:12px;overflow:hidden;margin:10px 0}
+.progress>div{height:100%;background:#ff7a00;width:0%;transition:width .3s}
+.minibar{height:10px;background:#e9e9e9;border-radius:6px;overflow:hidden;min-width:120px}
+.minibar>div{height:100%;background:#ff7a00}
+#licenseScreen{max-width:420px;margin:60px auto}
+.hidden{display:none}
+#printArea{display:none}
+@media print{body>*{display:none}#printArea{display:block!important;font-size:12px}}
+.report-head{display:flex;justify-content:space-between;border-bottom:3px solid #ff7a00;padding-bottom:8px;margin-bottom:12px}
+.verdict{font-size:22px;font-weight:bold;padding:12px;border-radius:8px;text-align:center;margin:12px 0}
+.note{background:#fff8e1;border:1px solid #ffe082;padding:10px;border-radius:8px;font-size:13px;margin-top:10px}
+.steps li{margin:6px 0 6px 18px;font-size:14px}
+footer{text-align:center;font-size:12px;color:#888;padding:16px}
+code{font-size:12px;background:#eee;padding:2px 6px;border-radius:4px;word-break:break-all}
+</style>
+</head>
+<body>
+<header>
+  <h1>💽 Disk<span>Test</span> Pro</h1>
+  <div class="lang"><button data-l="pt">PT</button><button data-l="es" class="active">ES</button><button data-l="en">EN</button></div>
+</header>
+
+<div id="licenseScreen" class="card">
+  <h2 data-t="license">Licencia</h2>
+  <p style="font-size:13px;color:#666" data-t="hwidLabel">ID de este equipo (HWID):</p>
+  <p id="hwid" style="font-family:monospace;background:#eee;padding:8px;border-radius:6px;font-size:12px;word-break:break-all">...</p>
+  <input type="text" id="keyInput" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" maxlength="29">
+  <button class="btn" id="btnActivate" data-t="activate">Activar</button>
+  <p id="licMsg" style="font-size:13px;margin-top:8px"></p>
+  <div class="note" data-t="buyNote">Para comprar tu licencia: WhatsApp +55 (41) 99729-4355 — IA Computers Curitiba</div>
+</div>
+
+<main id="mainApp" class="hidden">
+  <div class="card">
+    <h2 data-t="selectDrive">1. Selecciona el disco</h2>
+    <select id="driveSelect"></select>
+    <div id="driveInfo" style="font-size:13px;color:#555;margin-top:6px"></div>
+    <div class="note">⚠️ <span data-t="adminNote">Ejecuta DiskTest Pro como Administrador para acceso total al disco.</span></div>
+  </div>
+
+  <div class="card">
+    <h2 data-t="smartTitle">2. Análisis SMART (salud del disco)</h2>
+    <button class="btn" id="btnSmart" data-t="runSmart">Leer SMART</button>
+    <div id="smartResult"></div>
+  </div>
+
+  <div class="card">
+    <h2 data-t="surfaceTitle">3. Test de superficie (sector por sector)</h2>
+    <p style="font-size:13px;color:#666" data-t="surfaceDesc">Lee el disco completo y detecta sectores dañados. Puede tardar 30-90 min en discos grandes.</p>
+    <button class="btn" id="btnScan" data-t="runScan">Iniciar test de superficie</button>
+    <div class="progress"><div id="scanBar"></div></div>
+    <div id="scanStatus" style="font-size:13px"></div>
