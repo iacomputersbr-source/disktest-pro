@@ -1,0 +1,46 @@
+name: Build DiskTest Pro
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Download smartctl (motor SMART)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path src-tauri/binaries | Out-Null
+          $url = "https://github.com/smartmontools/smartmontools/releases/download/RELEASE_7_4/smartmontools-7.4-1.win32.zip"
+          Invoke-WebRequest -Uri $url -OutFile smart.zip
+          Expand-Archive smart.zip -DestinationPath smart_extract
+          $exe = Get-ChildItem -Recurse -Path smart_extract -Filter smartctl.exe | Select-Object -First 1
+          Copy-Item $exe.FullName "src-tauri/binaries/smartctl-x86_64-pc-windows-msvc.exe"
+
+      - name: Install frontend deps
+        run: npm install
+
+      - name: Generate icons
+        run: npx @tauri-apps/cli@2 icon src-tauri/icons/icon.png
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DiskTestPro-windows
+          path: src-tauri/target/release/bundle/
