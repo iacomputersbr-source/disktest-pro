@@ -34,6 +34,26 @@ jobs:
       - name: Install frontend deps
         run: npm install
 
+      - name: Ensure icon exists
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "src-tauri/icons/icon.png")) {
+            New-Item -ItemType Directory -Force -Path src-tauri/icons | Out-Null
+            Add-Type -AssemblyName System.Drawing
+            $bmp = New-Object System.Drawing.Bitmap(512,512)
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.Clear([System.Drawing.Color]::FromArgb(26,26,46))
+            $brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255,107,53))
+            $g.FillEllipse($brush, 56, 56, 400, 400)
+            $font = New-Object System.Drawing.Font("Arial", 200, [System.Drawing.FontStyle]::Bold)
+            $sf = New-Object System.Drawing.StringFormat
+            $sf.Alignment = "Center"; $sf.LineAlignment = "Center"
+            $g.DrawString("DT", $font, [System.Drawing.Brushes]::White, (New-Object System.Drawing.RectangleF(0,0,512,512)), $sf)
+            $bmp.Save("src-tauri/icons/icon.png", [System.Drawing.Imaging.ImageFormat]::Png)
+            $g.Dispose(); $bmp.Dispose()
+            Write-Host "Icono generado automaticamente"
+          } else { Write-Host "icon.png ya existe, se usa el tuyo" }
+
       - name: Generate icons
         run: npx @tauri-apps/cli@2 icon src-tauri/icons/icon.png
 
