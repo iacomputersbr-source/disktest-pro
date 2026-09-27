@@ -24,8 +24,19 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path src-tauri/binaries | Out-Null
-          $url = "https://github.com/smartmontools/smartmontools/releases/download/RELEASE_7_4/smartmontools-7.4-1.win32.zip"
-          Invoke-WebRequest -Uri $url -OutFile smart.zip
+          $urls = @(
+            "https://sourceforge.net/projects/smartmontools/files/smartmontools/7.5/smartmontools-7.5-1.win32.zip/download",
+            "https://sourceforge.net/projects/smartmontools/files/smartmontools/7.4/smartmontools-7.4-1.win32.zip/download"
+          )
+          $ok = $false
+          foreach ($u in $urls) {
+            try {
+              Invoke-WebRequest -Uri $u -OutFile smart.zip
+              $ok = $true
+              break
+            } catch { Write-Host "Fallo, probando siguiente..." }
+          }
+          if (-not $ok) { throw "No se pudo descargar smartmontools" }
           Expand-Archive smart.zip -DestinationPath smart_extract
           $exe = Get-ChildItem -Recurse -Path smart_extract -Filter smartctl.exe | Select-Object -First 1
           Copy-Item $exe.FullName "src-tauri/binaries/smartctl-x86_64-pc-windows-msvc.exe"
